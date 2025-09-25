@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarkerVideo - YouTube Bookmarks</title>
+    <link rel="stylesheet" href="sidepanel.css">
+</head>
+
+<body>
+    <!-- Header del pannello -->
+    <div class="header">
+        <img src="icons/icona32.png" alt="MarkerVideo" class="logo">
+        <h2>MarkerVideo</h2>
+        <p class="subtitle">YouTube Timestamp Bookmarks</p>
+    </div>
+
+    <!-- Informazioni video corrente -->
+    <div class="current-video">
+        <div class="video-info">
+            <h3 id="video-title">Nessun video caricato</h3>
+            <p id="video-url">Vai su un video YouTube per iniziare</p>
+        </div>
+    </div>
+
+    <!-- Sezione per aggiungere nuovo bookmark -->
+    <div class="add-bookmark-section">
+        <h3>📌 Aggiungi Bookmark</h3>
+        <div class="bookmark-form">
+            <input type="text" id="bookmark-note" placeholder="Aggiungi una nota (opzionale)" maxlength="100">
+            <button id="add-bookmark-btn" class="primary-btn">
+                <span>⏰</span> Salva Timestamp Corrente
+            </button>
+        </div>
+    </div>
+
+    <!-- Lista bookmark salvati -->
+    <div class="bookmarks-section">
+        <div class="section-header">
+            <h3>📝 Bookmark Salvati</h3>
+            <span id="bookmark-count" class="count-badge">0</span>
+        </div>
+
+        <!-- Container per i bookmark -->
+        <div id="bookmarks-container" class="bookmarks-list">
+            <!-- I bookmark verranno inseriti qui dinamicamente -->
+            <div class="empty-state">
+                <p>🎬 Nessun bookmark salvato</p>
+                <p class="hint">Usa il pulsante sopra per salvare il primo timestamp!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer con statistiche -->
+    <div class="footer">
+        <div class="stats">
+            <span class="stat">
+                <strong id="total-videos">0</strong> video con bookmark
+            </span>
+        </div>
+        <div class="actions">
+            <button id="clear-all-btn" class="danger-btn">
+                🗑️ Cancella Tutto
+            </button>
+        </div>
+    </div>
+
+    <!-- Template per bookmark item (nascosto, usato da JavaScript) -->
+    <template id="bookmark-template">
+        <div class="bookmark-item">
+            <div class="bookmark-content">
+                <div class="timestamp" data-time="">
+                    <span class="time-display">00:00:00</span>
+                    <button class="jump-btn" title="Vai a questo timestamp">
+                        ▶️
+                    </button>
+                </div>
+                <div class="bookmark-details">
+                    <p class="bookmark-note"></p>
+                    <small class="bookmark-date"></small>
+                </div>
+            </div>
+            <div class="bookmark-actions">
+                <button class="edit-btn" title="Modifica">✏️</button>
+                <button class="delete-btn" title="Elimina">🗑️</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Modal per conferma eliminazione -->
+    <div id="delete-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Conferma Eliminazione</h3>
+            <p>Sei sicuro di voler eliminare questo bookmark?</p>
+            <div class="modal-actions">
+                <button id="cancel-delete" class="secondary-btn">Annulla</button>
+                <button id="confirm-delete" class="danger-btn">Elimina</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="sidepanel.js"></script>
+</body>
+
+</html>

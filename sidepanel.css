@@ -1,0 +1,416 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* Include padding e border nella larghezza totale */
+}
+
+/* Stili per il body del pannello laterale */
+body {
+    /* Font stack per macOS/Windows l'interfaccia nativa su ogni sistema operativo, usando i font di sistema più belli e leggibili.*/
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Grigio chiaro per il background generale */
+    background: #f5f5f5;
+
+    /* Testo scuro standard */
+    color: #333;
+
+    /* Altezza completa della viewport */
+    height: 100vh;
+
+    /* Scroll verticale quando necessario */
+    overflow-y: auto;
+
+}
+
+/* Header con gradiente rosso YouTube */
+.header {
+    /* Gradiente diagonale rosso */
+    background: linear-gradient(135deg, #ff0000, #cc0000);
+
+    color: white;
+    padding: 20px;
+    /* Centra il contenuto */
+    text-align: center;
+
+}
+
+/* Logo dell'estensione nel header */
+.logo {
+    width: 32px;
+    height: 32px;
+    /* Spazio sotto il logo */
+    margin-bottom: 8px;
+
+}
+
+/* Titolo principale nel header */
+.header h2 {
+    /* Piccolo spazio sotto il titolo */
+    margin-bottom: 4px;
+
+}
+
+/* Sottotitolo nel header */
+.subtitle {
+    /* Leggermente trasparente per gerarchia visiva */
+    opacity: 0.9;
+
+    font-size: 14px;
+}
+
+/* Sezione informazioni video corrente */
+.current-video {
+    padding: 16px;
+    /* Sfondo bianco per contrasto */
+    background: white;
+    /* Linea di separazione sottile */
+    border-bottom: 1px solid #eee;
+
+}
+
+/* Titolo del video corrente */
+.video-info h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+    /* Nasconde il testo che esce dal container */
+    overflow: hidden;
+
+    /* Aggiunge "..." se il testo è troppo lungo */
+    text-overflow: ellipsis;
+
+    /* Impedisce l'andare a capo */
+    white-space: nowrap;
+
+}
+
+/* URL/info aggiuntive del video */
+.video-info p {
+    font-size: 12px;
+    /* Grigio per testo secondario */
+    color: #666;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Sezione per aggiungere nuovi bookmark */
+.add-bookmark-section {
+    padding: 16px;
+    background: white;
+    /* Separazione dalle altre sezioni */
+    border-bottom: 1px solid #eee;
+
+}
+
+/* Layout del form per aggiungere bookmark */
+.bookmark-form {
+    display: flex;
+    /* Elementi in colonna */
+    flex-direction: column;
+
+    /* Spazio tra gli elementi */
+    gap: 12px;
+
+}
+
+/* Input per la nota del bookmark */
+#bookmark-note {
+    padding: 8px 12px;
+    /* Bordo grigio chiaro */
+    border: 1px solid #ddd;
+
+    /* Angoli arrotondati */
+    border-radius: 6px;
+
+    font-size: 14px;
+}
+
+/* Stile per pulsanti principali (rosso YouTube) */
+.primary-btn {
+    /* Rosso YouTube */
+    background: #ff0000;
+
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    /* Centra verticalmente il contenuto */
+    justify-content: center;
+    /* Centra orizzontalmente */
+    gap: 8px;
+    /* Spazio tra icona e testo */
+}
+
+/* Effetto hover sul pulsante principale */
+.primary-btn:hover {
+    background: #cc0000;
+    /* Rosso più scuro al passaggio del mouse */
+}
+
+/* Sezione principale dei bookmark salvati */
+.bookmarks-section {
+    flex: 1;
+    /* Prende tutto lo spazio rimanente */
+    padding: 16px;
+}
+
+/* Header della sezione bookmark con titolo e contatore */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Titolo a sinistra, contatore a destra */
+    margin-bottom: 12px;
+}
+
+/* Badge con il conteggio dei bookmark */
+.count-badge {
+    background: #ff0000;
+    /* Rosso per visibilità */
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    /* Forma pillola */
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Container per la lista dei bookmark */
+.bookmarks-list {
+    display: flex;
+    flex-direction: column;
+    /* Bookmark in colonna */
+    gap: 8px;
+    /* Spazio tra ogni bookmark */
+}
+
+/* Singolo elemento bookmark */
+.bookmark-item {
+    background: white;
+    border: 1px solid #eee;
+    /* Bordo sottile */
+    border-radius: 8px;
+    /* Angoli arrotondati */
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    /* Contenuto a sinistra, azioni a destra */
+    align-items: center;
+}
+
+/* Contenuto principale del bookmark (timestamp + dettagli) */
+.bookmark-content {
+    flex: 1;
+    /* Prende la maggior parte dello spazio */
+    display: flex;
+    gap: 12px;
+    /* Spazio tra timestamp e dettagli */
+    align-items: center;
+}
+
+/* Box del timestamp */
+.timestamp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* Spazio tra tempo e pulsante play */
+    background: #f0f0f0;
+    /* Grigio chiaro per distinguerlo */
+    padding: 6px 10px;
+    border-radius: 6px;
+    min-width: 100px;
+    /* Larghezza minima per consistenza */
+}
+
+/* Visualizzazione del tempo (HH:MM:SS) */
+.time-display {
+    font-weight: bold;
+    font-family: monospace;
+    /* Font monospace per allineamento numeri */
+    font-size: 14px;
+}
+
+/* Pulsante per saltare al timestamp */
+.jump-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px;
+}
+
+/* Effetto hover sul pulsante jump */
+.jump-btn:hover {
+    opacity: 0.7;
+    /* Leggera trasparenza */
+}
+
+/* Container per i dettagli del bookmark */
+.bookmark-details {
+    flex: 1;
+    /* Prende lo spazio rimanente */
+}
+
+/* Nota/descrizione del bookmark */
+.bookmark-note {
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+/* Data di creazione del bookmark */
+.bookmark-date {
+    color: #666;
+    /* Grigio per testo secondario */
+    font-size: 12px;
+}
+
+/* Container per le azioni (modifica/elimina) */
+.bookmark-actions {
+    display: flex;
+    gap: 4px;
+    /* Piccolo spazio tra i pulsanti */
+}
+
+/* Stili per pulsanti di azione */
+.edit-btn,
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Effetto hover per pulsante modifica */
+.edit-btn:hover {
+    background: #e3f2fd;
+    /* Blu chiaro */
+}
+
+/* Effetto hover per pulsante elimina */
+.delete-btn:hover {
+    background: #ffebee;
+    /* Rosso chiaro */
+}
+
+/* Stato vuoto quando non ci sono bookmark */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    /* Ampio padding per centrare visivamente */
+    color: #666;
+    /* Grigio per testo meno importante */
+}
+
+/* Testo di suggerimento nello stato vuoto */
+.hint {
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* Footer del pannello */
+.footer {
+    padding: 16px;
+    border-top: 1px solid #eee;
+    /* Linea di separazione superiore */
+    background: white;
+}
+
+/* Sezione statistiche nel footer */
+.stats {
+    margin-bottom: 12px;
+    font-size: 14px;
+    text-align: center;
+    color: #666;
+    /* Grigio per info secondarie */
+}
+
+/* Pulsante di azione pericolosa (elimina tutto) */
+.danger-btn {
+    background: #dc3545;
+    /* Rosso Bootstrap per azioni pericolose */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    width: 100%;
+    /* Larghezza completa */
+}
+
+/* Effetto hover per pulsante pericoloso */
+.danger-btn:hover {
+    background: #c82333;
+    /* Rosso più scuro */
+}
+
+/* Modal overlay per conferme */
+.modal {
+    position: fixed;
+    /* Posizione fissa rispetto alla viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    /* Overlay semi-trasparente */
+    display: flex;
+    align-items: center;
+    /* Centra verticalmente */
+    justify-content: center;
+    /* Centra orizzontalmente */
+    z-index: 1000;
+    /* Sopra tutto il resto */
+}
+
+/* Stato nascosto del modal */
+.modal.hidden {
+    display: none;
+}
+
+/* Contenuto del modal */
+.modal-content {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    width: 90%;
+    /* Responsive */
+    max-width: 300px;
+    /* Larghezza massima */
+}
+
+/* Azioni nel modal (pulsanti) */
+.modal-actions {
+    display: flex;
+    gap: 8px;
+    /* Spazio tra i pulsanti */
+    margin-top: 16px;
+}
+
+/* Pulsante secondario (annulla) */
+.secondary-btn {
+    background: #6c757d;
+    /* Grigio Bootstrap */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex: 1;
+    /* Prende metà spazio disponibile */
+}
+
+/* Effetto hover per pulsante secondario */
+.secondary-btn:hover {
+    background: #5a6268;
+    /* Grigio più scuro */
+}

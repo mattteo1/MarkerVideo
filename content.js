@@ -3,6 +3,7 @@
     let currentVideo = "";
     let currentVideoBookmarks = [];
 
+    // Ascolta messaggi dal background
     chrome.runtime.onMessage.addListener((obj, sender, response) => {
         const { type, value, videoId } = obj;
         if (type === "NEW") {
@@ -11,7 +12,7 @@
         }
     })
 
-
+    // Carica bookmark dal storage
     const fetchBookmarks = () => {
         return new Promise((resolve) => {
             chrome.storage.sync.get([currentVideo], (obj) => {
@@ -113,6 +114,15 @@
         })
     }
 
+    const getTime = (t) => {
+        // Crea un nuovo oggetto Date partendo da 0 (1 gennaio 1970, 00:00:00)
+        var date = new Date(0);
+        // Imposta i secondi della data (es: se t=125, imposta 125 secondi = 2 minuti e 5 secondi)
+        date.setSeconds(t);
+
+        //estrae HH:MM:SS
+        return date.toISOString().substring(11, 19);
+    }
 
 
     newVideoLoaded();
@@ -120,12 +130,3 @@
 })()
 
 
-const getTime = (t) => {
-    // Crea un nuovo oggetto Date partendo da 0 (1 gennaio 1970, 00:00:00)
-    var date = new Date(0);
-    // Imposta i secondi della data (es: se t=125, imposta 125 secondi = 2 minuti e 5 secondi)
-    date.setSeconds(t);
-
-    //estrae HH:MM:SS
-    return date.toISOString().substring(11, 19);
-}
