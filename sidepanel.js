@@ -9,8 +9,82 @@ async function getCurrentTab() {
     return tab;
 }
 
+
+// Variabili globali per tenere traccia dello stato
+let currentVideo = "";
+let currentVideoBookmarks = [];
+
+const addNewBookmark = (bookmarkElement, bookmark) => {
+    //Crea: <div></div> così const bookmarkTitleElement = document.createElement("div"); ...
+    //però ho già template in hmtl
+    const template = document.getElementById('bookmark-template');
+    //fa una fotocopia del template scrivendoci sopra senza rovinare l'originale
+    const bookmarkHTML = template.content.cloneNode(true);
+
+    // TROVA gli elementi che già esistono:
+    const newBookmarkElement = bookmarkHTML.querySelector('.bookmark-item');
+    const timeDisplay = bookmarkHTML.querySelector('.time-display');
+    const jumpButton = bookmarkHTML.querySelector('.jump-btn');
+    const deleteButton = bookmarkHTML.querySelector('.delete-btn');
+    const editButton = bookmarkHTML.querySelector('.edit-btn');
+    const noteElement = bookmarkHTML.querySelector('.bookmark-note');
+    const timestampDiv = bookmarkHTML.querySelector('.timestamp');
+    const bookmarkTitleElement = bookmarkHTML.querySelector('.bookmark-title');
+    const bookmarkDateElement = bookmarkHTML.querySelector('.bookmark-date');
+
+
+    newBookmarkElement.id = "bookmark-" + bookmark.time;
+    timeDisplay.textContent = bookmark.time;
+    bookmarkTitleElement.textContent = bookmark.title;
+    noteElement.textContent = bookmark.desc;
+    timestampDiv.setAttribute('data-time', bookmark.time);
+
+    // Aggiungi data se presente
+    if (bookmark.date) {
+        bookmarkDateElement.textContent = new Date(bookmark.date).toLocaleDateString();
+    } else {
+        bookmarkDateElement.textContent = 'Oggi';
+    }
+
+    jumpButton.addEventListener('click', () => {
+        jumpToTimestamp(bookmark.time);
+    });
+
+    editButton.addEventListener('click', () => {
+        editBookmark(bookmark);
+    });
+
+    deleteButton.addEventListener('click', () => {
+        deleteBookmark(bookmark);
+    });
+
+    //Aggiungi l'elemento al contenitore
+    bookmarkElement.appendChild(bookmarkHTML);
+
+
+}
+
+
+const jumpToTimestamp = (bookmark) => { }
+
+const editBookmark = (bookmark) => { }
+
+const deleteBookmark = (bookmark) => { };
+
+
+
+// Funzione per aggiornare il contatore
+const updateBookmarkCount = () => {
+    const countElement = document.getElementById('bookmark-count');
+    if (countElement) {
+        countElement.textContent = currentVideoBookmarks.length;
+    }
+}
+
+
+
 const viewBookmarks = (currentBookmarks = []) => {
-    const bookmarksElement = document.getElementsByClassName("bookmarks-list")[0];
+    const bookmarksElement = document.getElementById("bookmarks-container");
     if (!bookmarksElement) {
         console.error("Elemento bookmarks-list non trovato");
         return;
@@ -22,7 +96,7 @@ const viewBookmarks = (currentBookmarks = []) => {
             const bookmark = currentBookmarks[i];
             addNewBookmark(bookmarksElement, bookmark);
         }
-        //aggioran contatorea
+        updateBookmarkCount();
 
     } else {
         bookmarksElement.innerHTML = `
@@ -31,16 +105,71 @@ const viewBookmarks = (currentBookmarks = []) => {
                 <p class="hint">Usa il pulsante sopra per salvare il primo timestamp!</p>
             </div>
         `;
-        //aggiorna contatore a 0
+        updateBookmarkCount();
+    }
+}
+
+// Funzione per ascoltare i cambiamenti nello storage
+const listenForStorageChanges = () => {
+    if (!isExtensionContextValid()) {
+        console.warn('Cannot set up storage listener: extension context invalid');
+        return;
+    }
+
+
+    try {
+        // Questa funzione viene chiamata AUTOMATICAMENTE ogni volta che:
+        // - Qualcuno salva nuovi dati nel chrome.storage
+        // - Qualcuno modifica dati esistenti
+        // - Qualcuno elimina dati
+        // changes = oggetto con i cambiamenti
+        // namespace = "sync" | "local" | "managed"
+        chrome.storage.onChanged.addListener((changes, namespace) => {
+            // 1. Controlla se il cambiamento è nello storage 'sync'
+            // 2. Controlla se abbiamo un video corrente caricato (currentVideo)
+            // 3. Controlla se il cambiamento riguarda il nostro video (changes[currentVideo])
+            if (namespace === 'sync' && currentVideo && changes[currentVideo]) {
+
+                // I bookmark sono cambiati per il video corrente
+                const newBookmarks = changes[currentVideo].newValue ?
+                    JSON.parse(changes[currentVideo].newValue) : [];
+
+                // 5. Aggiorna la variabile globale
+                currentVideoBookmarks = newBookmarks;
+                // 6. Aggiorna l'interfaccia utente
+                viewBookmarks(currentVideoBookmarks);
+            }
+        });
+    } catch (error) {
+        console.error('Error setting up storage listener:', error);
     }
 }
 
 
-
+// Funzione per mostrare errore nel UI
+const showExtensionError = () => {
+    const container = document.getElementsByClassName("video-info")[0];
+    if (container) {
+        container.innerHTML = `
+            <h3 id="video-title">⚠️ Errore Estensione</h3>
+            <p id="video-url">L'estensione è stata ricaricata. Ricarica questa pagina per ripristinare la funzionalità.</p>
+        `;
+    }
+}
 
 // Aspetta che il DOM del side panel sia completamente caricato
 document.addEventListener("DOMContentLoaded", async () => {
+    // Controlla subito se l'extension context è valido
+    if (!isExtensionContextValid()) {
+        showExtensionError();
+        return;
+    }
+
     const activeTab = await getCurrentTab();
+    if (!activeTab) {
+        showExtensionError();
+        return;
+    }
     const container = document.getElementsByClassName("video-info")[0];
 
     // CASO 1: Non siamo su YouTube
@@ -63,7 +192,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const urlParameters = new URLSearchParams(queryParameters);
-    const currentVideo = urlParameters.get("v");
+    currentVideo = urlParameters.get("v");
 
     // CASO 3: Siamo su YouTube ma l'URL non ha parametro "v"
     if (!currentVideo) {
@@ -83,8 +212,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
 
         chrome.storage.sync.get([currentVideo], (data) => {
-            const currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
-            // Logica per mostrare i bookmark...
+            currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
+            viewBookmarks(currentVideoBookmarks);
         });
     }
+
+    listenForStorageChanges();
 });
