@@ -10,6 +10,15 @@ async function getCurrentTab() {
 }
 
 
+// Funzione per controllare se l'extension context è ancora valido
+function isExtensionContextValid() {
+    try {
+        return chrome.runtime && chrome.runtime.id;
+    } catch (error) {
+        return false;
+    }
+}
+
 // Variabili globali per tenere traccia dello stato
 let currentVideo = "";
 let currentVideoBookmarks = [];
@@ -34,7 +43,7 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
 
 
     newBookmarkElement.id = "bookmark-" + bookmark.time;
-    timeDisplay.textContent = bookmark.time;
+    timeDisplay.textContent = formatTime(bookmark.time);
     bookmarkTitleElement.textContent = bookmark.title;
     noteElement.textContent = bookmark.desc;
     timestampDiv.setAttribute('data-time', bookmark.time);
@@ -82,6 +91,12 @@ const updateBookmarkCount = () => {
 }
 
 
+// Funzione per formattare il tempo in HH:MM:SS
+function formatTime(seconds) {
+    const date = new Date(0);
+    date.setSeconds(seconds);
+    return date.toISOString().substring(11, 19);
+}
 
 const viewBookmarks = (currentBookmarks = []) => {
     const bookmarksElement = document.getElementById("bookmarks-container");

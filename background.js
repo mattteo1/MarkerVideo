@@ -1,6 +1,6 @@
-chrome.tabs.onUpdated.addListener((tabId, tab) => {
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
-    if (tab.url && tab.url.includes("youtube.com/watch")) {
+    if (changeInfo.status === "complete" && tab.url && tab.url.includes("youtube.com/watch")) {
         const queryParameters = tab.url.split("?")[1];
         //URLSearchParams serve per estrarre e gestire i parametri dall'URL di YouTube, URLSearchParams ti permette di sapere quale video sta guardando l'utente e da che momento ha iniziato!
         const urlParameters = new URLSearchParams(queryParameters);
