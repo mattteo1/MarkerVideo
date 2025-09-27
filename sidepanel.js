@@ -67,6 +67,7 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
         deleteBookmark(bookmark);
     });
 
+
     //Aggiungi l'elemento al contenitore
     bookmarkElement.appendChild(bookmarkHTML);
 
@@ -87,6 +88,13 @@ const deleteBookmark = async (bookmark) => {
     const currentTab = await getCurrentTab();
     chrome.tabs.sendMessage(currentTab.id, { type: "DELETE", timestamp: bookmark.time });
 };
+
+
+const deleteAllBookmarksFunction = async () => {
+    const currentTab = await getCurrentTab();
+    if (!currentTab) return;
+    chrome.tabs.sendMessage(currentTab.id, { type: "DELETEALL" });
+}
 
 
 
@@ -237,6 +245,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         chrome.storage.sync.get([currentVideo], (data) => {
             currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
             viewBookmarks(currentVideoBookmarks);
+        });
+    }
+
+    const deleteAllBtn = document.querySelector('.danger-btn');
+    if (deleteAllBtn) {
+        deleteAllBtn.addEventListener('click', () => {
+            deleteAllBookmarksFunction();
         });
     }
 

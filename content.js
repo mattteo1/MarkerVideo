@@ -27,11 +27,28 @@
             youtubePlayer.currentTime = timestamp;
         }
         if (type === "DELETE") {
-            deleteVideo(timestamp);
+            deleteBookmarkStorage(timestamp);
+        }
+        if (type === "DELETEALL") {
+            deleteAllBookmarksStorage();
         }
     })
 
-    const deleteVideo = async (timestamp) => {
+    const deleteAllBookmarksStorage = async () => {
+        try {
+            chrome.storage.sync.set({
+                [currentVideo]: JSON.stringify([])
+            }, () => {
+                if (!chrome.runtime.lastError) {
+                    console.log("✅ Bookmark deleted successfully");
+                }
+            });
+        } catch (error) {
+            console.error("Error in deleteAllBookmark:", error);
+        }
+    }
+
+    const deleteBookmarkStorage = async (timestamp) => {
         try {
             currentVideoBookmarks = await fetchBookmarks();
 
@@ -57,7 +74,7 @@
                 }
             });
         } catch (error) {
-            console.error("Error in deleteVideo:", error);
+            console.error("Error in deleteBookmark:", error);
         }
     }
 
