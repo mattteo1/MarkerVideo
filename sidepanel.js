@@ -56,7 +56,7 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
     }
 
     jumpButton.addEventListener('click', () => {
-        jumpToTimestamp(bookmark.time);
+        jumpToTimestamp(bookmark);
     });
 
     editButton.addEventListener('click', () => {
@@ -74,11 +74,19 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
 }
 
 
-const jumpToTimestamp = (bookmark) => { }
+const jumpToTimestamp = async (bookmark) => {
+    const timestamp = bookmark.time;
+    const currentTab = await getCurrentTab();
+
+    chrome.tabs.sendMessage(currentTab.id, { type: "JUMP", timestamp: timestamp });
+}
 
 const editBookmark = (bookmark) => { }
 
-const deleteBookmark = (bookmark) => { };
+const deleteBookmark = async (bookmark) => {
+    const currentTab = await getCurrentTab();
+    chrome.tabs.sendMessage(currentTab.id, { type: "DELETE", timestamp: bookmark.time });
+};
 
 
 
