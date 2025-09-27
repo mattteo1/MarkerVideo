@@ -47,6 +47,7 @@
 
             } catch (error) {
                 console.error('Error fetching bookmarks:', error);
+                //restituisce array vuoto
                 resolve([]);
             }
         });
@@ -108,61 +109,6 @@
 
     //viene chiamata ogni volta che l'utente cambia video su yt
     const newVideoLoaded = async () => {
-        /*
-        
-
-        // Quando l'utente cambia video, carica i suoi bookmark salvati
-        if (isExtensionContextValid()) {
-            currentVideoBookmarks = await fetchBookmarks();
-        }
-
-        if (!bookmarkBtnExists) {
-
-            // PROMISE: Aspetta che i controlli si carichino prima di continuare
-            // Questa è una operazione asincrona - potrebbe richiedere tempo
-            await waitForElement(".ytp-left-controls");
-
-            //Crea un nuovo elemento immagine, ma non mostrarlo ancora
-            const bookmarkBtn = document.createElement("img");
-
-            //Controllo extension context prima di usare chrome.runtime.getURL
-            if (!isExtensionContextValid()) {
-                console.warn('Extension context invalid, cannot create bookmark button');
-                return;
-            }
-
-            try {
-                // Imposta l'icona del pulsante
-                bookmarkBtn.src = chrome.runtime.getURL("icons/bookmark.png");
-            } catch (error) {
-                console.error('Error loading bookmark icon:', error);
-                return;
-            }
-
-
-            // Ora bookmarkBtn contiene: <img src="path/to/image.png" class="ytp-button bookmark-btn">
-            bookmarkBtn.className = "ytp-button " + "bookmark-btn";
-
-            bookmarkBtn.title = "Click the bookmark current timestamp";
-
-            //Dove aggiungere il pulsante bookmark
-            youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-
-            //Da dove leggere il timestamp corrente
-            youtubePlayer = document.getElementsByClassName("video-stream")[0];
-
-            // Controlla che esistano prima di usarli
-            if (youtubeLeftControls && youtubePlayer) {
-                //aggiunge bottone, appendChild() agginge figlio a un elemento padre del DOM
-                youtubeLeftControls.appendChild(bookmarkBtn);
-                bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
-            } else {
-                console.error("Controlli YouTube non trovati!");
-                console.error("youtubeLeftControls:", youtubeLeftControls);
-                console.error("youtubePlayer:", youtubePlayer);
-            }
-
-        }*/
         try {
             // 1. Controlla duplicati
             if (document.querySelector(".bookmark-btn")) {
@@ -175,13 +121,22 @@
             if (!v) { return; }
             currentVideo = v;
 
-            // Attendi i controlli
-            const controls = await waitForElement(".ytp-left-controls");
-            const player = await waitForElement("video.video-stream");
+            // Attendi i controlli con selettori più affidabili
+            const controls = await waitForElement(".ytp-left-controls") ||
+                await waitForElement(".ytp-chrome-controls .ytp-left-controls") ||
+                await waitForElement("div.ytp-left-controls");
 
+            const player = await waitForElement("video.video-stream") ||
+                await waitForElement("video.html5-video-container") ||
+                await waitForElement("video");
+
+            console.log("Controls found:", controls);
+            console.log("Player found:", player);
 
             if (!controls || !player) {
-                console.error("Controls or player not found");
+                console.error("Controls or player not found after all attempts");
+                console.error("Available controls:", document.querySelectorAll("[class*='ytp']"));
+                console.error("Available videos:", document.querySelectorAll("video"));
                 return;
             }
 
@@ -214,7 +169,7 @@
             controls.appendChild(bookmarkBtn);
             bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
 
-            console.log("✅ Bookmark button added successfully");
+            console.log(" Bookmark button added successfully");
 
 
 
@@ -226,28 +181,28 @@
     }
 
     // PROMISE: Funzione che aspetta che un elemento si carichi nel DOM
-    const waitForElement = (selector, timeout = 1000) => {
-        // Crea una nuova Promise - è un "contratto" che dice:
-        // "Ti prometto che prima o poi troverò questo elemento"
-
+    const waitForElement = (selector, timeout = 5000) => {
         return new Promise((resolve) => {
             const start = performance.now();
-            // Funzione che controlla ripetutamente se l'elemento esiste
+
             const checkElement = () => {
-                // Cerca l'elemento nel DOM
                 const element = document.querySelector(selector);
+
                 if (element) {
-                    // SUCCESSO: Elemento trovato!
-                    // resolve() significa "Promise mantenuta - ecco il risultato"
+                    console.log(` Element found: ${selector}`);
                     return resolve(element);
-                } else {
-                    // ELEMENTO NON ANCORA PRESENTE: Riprova tra 100ms
-                    // setTimeout() aspetta 100ms e poi richiama checkElement()
-                    setTimeout(checkElement, 100);
                 }
-                if (performance.now() - start > timeout) return resolve(null);
-                requestAnimationFrame(checkElement);
+
+                // Controlla se è scaduto il timeout
+                if (performance.now() - start > timeout) {
+                    console.warn(` Timeout for element: ${selector}`);
+                    return resolve(null);
+                }
+
+                // Riprova dopo 100ms
+                setTimeout(checkElement, 100);
             };
+
             // Inizia il controllo
             checkElement();
         });
@@ -280,14 +235,6 @@
     } else {
         init();
     }
-
-
-
-
-
-
-
-
 
 
     newVideoLoaded();
