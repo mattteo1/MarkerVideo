@@ -18,12 +18,68 @@
             console.warn("Message ignored: extension context invalid");
             return;
         }
-        const { type, videoId } = obj;
+        const { type, videoId, timestamp } = obj;
         if (type === "NEW") {
             currentVideo = videoId;
             newVideoLoaded();
         }
+        if (type === "JUMP") {
+            youtubePlayer.currentTime = timestamp;
+        }
+        if (type === "DELETE") {
+            deleteBookmarkStorage(timestamp);
+        }
+        if (type === "DELETEALL") {
+            deleteAllBookmarksStorage();
+        }
+        if (type === "CREATE_BOOKMARK") {
+            addNewBookmarkEventHandler();
+        }
     })
+
+    const deleteAllBookmarksStorage = async () => {
+        try {
+            chrome.storage.sync.set({
+                [currentVideo]: JSON.stringify([])
+            }, () => {
+                if (!chrome.runtime.lastError) {
+                    console.log("✅ Bookmark deleted successfully");
+                }
+            });
+        } catch (error) {
+            console.error("Error in deleteAllBookmark:", error);
+        }
+    }
+
+    const deleteBookmarkStorage = async (timestamp) => {
+        try {
+            currentVideoBookmarks = await fetchBookmarks();
+
+
+            // Trova e rimuovi il bookmark con quel timestamp
+            const indexToDelete = currentVideoBookmarks.findIndex(bookmark => bookmark.time === timestamp);
+
+            if (indexToDelete !== -1) {
+                currentVideoBookmarks.splice(indexToDelete, 1);
+
+            } else {
+                console.error(" Bookmark not found");
+                return;
+            }
+
+            console.log("After delete:", currentVideoBookmarks.length);
+
+            chrome.storage.sync.set({
+                [currentVideo]: JSON.stringify(currentVideoBookmarks)
+            }, () => {
+                if (!chrome.runtime.lastError) {
+                    console.log("✅ Bookmark deleted successfully");
+                }
+            });
+        } catch (error) {
+            console.error("Error in deleteBookmark:", error);
+        }
+    }
 
     // Carica bookmark dal storage
     const fetchBookmarks = () => {
@@ -82,7 +138,6 @@
         const newBookmark = {
             time: currentTime,
             title: "Bookmark at " + getTime(currentTime),
-            desc: "",
             date: new Date().toISOString()
         }
 
@@ -180,6 +235,12 @@
 
     }
 
+
+
+
+
+
+
     // PROMISE: Funzione che aspetta che un elemento si carichi nel DOM
     const waitForElement = (selector, timeout = 5000) => {
         return new Promise((resolve) => {
@@ -238,6 +299,8 @@
 
 
     newVideoLoaded();
+
+
 
 })()
 

@@ -36,7 +36,6 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
     const jumpButton = bookmarkHTML.querySelector('.jump-btn');
     const deleteButton = bookmarkHTML.querySelector('.delete-btn');
     const editButton = bookmarkHTML.querySelector('.edit-btn');
-    const noteElement = bookmarkHTML.querySelector('.bookmark-note');
     const timestampDiv = bookmarkHTML.querySelector('.timestamp');
     const bookmarkTitleElement = bookmarkHTML.querySelector('.bookmark-title');
     const bookmarkDateElement = bookmarkHTML.querySelector('.bookmark-date');
@@ -45,7 +44,6 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
     newBookmarkElement.id = "bookmark-" + bookmark.time;
     timeDisplay.textContent = formatTime(bookmark.time);
     bookmarkTitleElement.textContent = bookmark.title;
-    noteElement.textContent = bookmark.desc;
     timestampDiv.setAttribute('data-time', bookmark.time);
 
     // Aggiungi data se presente
@@ -55,8 +53,10 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
         bookmarkDateElement.textContent = 'Oggi';
     }
 
+
+
     jumpButton.addEventListener('click', () => {
-        jumpToTimestamp(bookmark.time);
+        jumpToTimestamp(bookmark);
     });
 
     editButton.addEventListener('click', () => {
@@ -67,6 +67,7 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
         deleteBookmark(bookmark);
     });
 
+
     //Aggiungi l'elemento al contenitore
     bookmarkElement.appendChild(bookmarkHTML);
 
@@ -74,11 +75,26 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
 }
 
 
-const jumpToTimestamp = (bookmark) => { }
+const jumpToTimestamp = async (bookmark) => {
+    const timestamp = bookmark.time;
+    const currentTab = await getCurrentTab();
+
+    chrome.tabs.sendMessage(currentTab.id, { type: "JUMP", timestamp: timestamp });
+}
 
 const editBookmark = (bookmark) => { }
 
-const deleteBookmark = (bookmark) => { };
+const deleteBookmark = async (bookmark) => {
+    const currentTab = await getCurrentTab();
+    chrome.tabs.sendMessage(currentTab.id, { type: "DELETE", timestamp: bookmark.time });
+};
+
+
+const deleteAllBookmarksFunction = async () => {
+    const currentTab = await getCurrentTab();
+    if (!currentTab) return;
+    chrome.tabs.sendMessage(currentTab.id, { type: "DELETEALL" });
+}
 
 
 
@@ -172,6 +188,19 @@ const showExtensionError = () => {
     }
 }
 
+//sistema titolo video
+function cleanYouTubeTitle(title) {
+    if (!title) return 'Video YouTube';
+
+    // Rimuove il contatore di notifiche all'inizio: (1257)
+    let cleanTitle = title.replace(/^\(\d+\)\s*/, '');
+
+    // Rimuove il suffisso " - YouTube" alla fine
+    cleanTitle = cleanTitle.replace(/\s*-\s*YouTube$/, '');
+
+    return cleanTitle.trim();
+}
+
 // Aspetta che il DOM del side panel sia completamente caricato
 document.addEventListener("DOMContentLoaded", async () => {
     // Controlla subito se l'extension context è valido
@@ -222,13 +251,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (activeTab.url.includes("youtube.com/watch") && currentVideo) {
         // Aggiorna le info del video
         container.innerHTML = `
-            <h3 id="video-title">${activeTab.title || 'Video YouTube'}</h3>
+            <h3 id="video-title">${cleanYouTubeTitle(activeTab.title) || 'Video YouTube'}</h3>
             <p id="video-url">ID Video: ${currentVideo}</p>
         `;
 
         chrome.storage.sync.get([currentVideo], (data) => {
             currentVideoBookmarks = data[currentVideo] ? JSON.parse(data[currentVideo]) : [];
             viewBookmarks(currentVideoBookmarks);
+        });
+    }
+
+
+    const currentTimestampBtn = document.querySelector('.primary-btn');
+    if (currentTimestampBtn) {
+        currentTimestampBtn.addEventListener('click', async () => {
+            const currentTab = await getCurrentTab();
+            if (!currentTab) return;
+
+            chrome.tabs.sendMessage(currentTab.id, {
+                type: "CREATE_BOOKMARK"
+            })
+        })
+    }
+
+    const deleteAllBtn = document.querySelector('.danger-btn');
+    if (deleteAllBtn) {
+        deleteAllBtn.addEventListener('click', () => {
+            deleteAllBookmarksFunction();
         });
     }
 
