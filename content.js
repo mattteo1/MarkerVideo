@@ -32,6 +32,9 @@
         if (type === "DELETEALL") {
             deleteAllBookmarksStorage();
         }
+        if (type === "CREATE_BOOKMARK") {
+            addNewBookmarkEventHandler();
+        }
     })
 
     const deleteAllBookmarksStorage = async () => {

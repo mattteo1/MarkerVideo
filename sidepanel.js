@@ -53,6 +53,8 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
         bookmarkDateElement.textContent = 'Oggi';
     }
 
+
+
     jumpButton.addEventListener('click', () => {
         jumpToTimestamp(bookmark);
     });
@@ -260,6 +262,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
+    const currentTimestampBtn = document.querySelector('.primary-btn');
+    if (currentTimestampBtn) {
+        currentTimestampBtn.addEventListener('click', async () => {
+            const currentTab = await getCurrentTab();
+            if (!currentTab) return;
+
+            chrome.tabs.sendMessage(currentTab.id, {
+                type: "CREATE_BOOKMARK"
+            })
+        })
+    }
 
     const deleteAllBtn = document.querySelector('.danger-btn');
     if (deleteAllBtn) {
