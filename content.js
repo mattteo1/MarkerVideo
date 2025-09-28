@@ -135,7 +135,6 @@
         const newBookmark = {
             time: currentTime,
             title: "Bookmark at " + getTime(currentTime),
-            desc: "",
             date: new Date().toISOString()
         }
 
