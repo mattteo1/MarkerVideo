@@ -37,6 +37,74 @@
         }
     })
 
+
+    const addBookmarkMarkers = async () => {
+        try {
+            // Selettori per la progress bar di YouTube
+            const progressBar = await waitForElement(".ytp-progress-bar-container") ||
+                await waitForElement(".ytp-chrome-bottom .ytp-progress-bar") ||
+                await waitForElement(".ytp-progress-bar");
+
+            if (!progressBar) {
+                console.warn("Progress bar non trovata");
+                return;
+            }
+
+            // Ottieni la durata totale del video
+            const videoDuration = youtubePlayer.duration;
+            if (!videoDuration) return;
+
+            // Rimuovi marker esistenti per evitare duplicati
+            document.querySelectorAll('.bookmark-marker').forEach(marker => marker.remove());
+
+            // Carica i bookmark correnti
+            const bookmarks = await fetchBookmarks();
+
+            // Crea un marker per ogni bookmark
+            bookmarks.forEach(bookmark => {
+                createBookmarkMarker(progressBar, bookmark.time, videoDuration);
+            });
+
+        } catch (error) {
+            console.error("Errore nel creare i marker:", error);
+        }
+    };
+
+
+
+    const createBookmarkMarker = (progressBar, bookmarkTime, videoDuration) => {
+        // Crea l'elemento marker
+        const marker = document.createElement('div');
+        marker.className = 'bookmark-marker';
+
+        // Calcola la posizione percentuale sulla timeline
+        const positionPercent = (bookmarkTime / videoDuration) * 100;
+
+        // Stili CSS per il marker
+        marker.style.cssText = `
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background-color: white;
+        border: 2px solid #ff0000;
+        border-radius: 50%;
+        top: 50%;
+        left: ${positionPercent}%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+        pointer-events: none;
+        box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    `;
+
+        // Aggiungi tooltip opzionale
+        marker.title = `Bookmark: ${getTime(bookmarkTime)}`;
+
+        // Aggiungi alla progress bar
+        progressBar.appendChild(marker);
+    };
+
+
+
     const deleteAllBookmarksStorage = async () => {
         try {
             chrome.storage.sync.set({
@@ -74,6 +142,9 @@
             }, () => {
                 if (!chrome.runtime.lastError) {
                     console.log("✅ Bookmark deleted successfully");
+                    setTimeout(() => {
+                        addBookmarkMarkers();
+                    }, 500);
                 }
             });
         } catch (error) {
@@ -151,8 +222,10 @@
                     alert('Errore nel salvare il bookmark');
                 } else {
                     console.log("✅ Bookmark saved successfully");
-                    // Feedback visivo opzionale
-                    //showBookmarkSavedFeedback();
+                    //Aggiorna i marker dopo aver salvato
+                    setTimeout(() => {
+                        addBookmarkMarkers();
+                    }, 500);
                 }
             });
         } catch (error) {
@@ -227,6 +300,9 @@
             console.log(" Bookmark button added successfully");
 
 
+            setTimeout(() => {
+                addBookmarkMarkers();
+            }, 2000); // Aspetta che YouTube si stabilizzi
 
 
         } catch (e) {
@@ -280,6 +356,8 @@
         //estrae HH:MM:SS
         return date.toISOString().substring(11, 19);
     }
+
+
 
     const init = () => {
         const videoId = new URLSearchParams(location.search).get("v");
