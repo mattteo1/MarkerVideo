@@ -269,7 +269,6 @@ body {
 }
 
 /* Stili per pulsanti di azione */
-.edit-btn,
 .delete-btn {
     background: none;
     border: none;
@@ -277,12 +276,6 @@ body {
     padding: 4px;
     border-radius: 4px;
     font-size: 14px;
-}
-
-/* Effetto hover per pulsante modifica */
-.edit-btn:hover {
-    background: #e3f2fd;
-    /* Blu chiaro */
 }
 
 /* Effetto hover per pulsante elimina */

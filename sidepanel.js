@@ -35,7 +35,6 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
     const timeDisplay = bookmarkHTML.querySelector('.time-display');
     const jumpButton = bookmarkHTML.querySelector('.jump-btn');
     const deleteButton = bookmarkHTML.querySelector('.delete-btn');
-    const editButton = bookmarkHTML.querySelector('.edit-btn');
     const timestampDiv = bookmarkHTML.querySelector('.timestamp');
     const bookmarkTitleElement = bookmarkHTML.querySelector('.bookmark-title');
     const bookmarkDateElement = bookmarkHTML.querySelector('.bookmark-date');
@@ -59,9 +58,6 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
         jumpToTimestamp(bookmark);
     });
 
-    editButton.addEventListener('click', () => {
-        editBookmark(bookmark);
-    });
 
     deleteButton.addEventListener('click', () => {
         deleteBookmark(bookmark);
@@ -82,7 +78,6 @@ const jumpToTimestamp = async (bookmark) => {
     chrome.tabs.sendMessage(currentTab.id, { type: "JUMP", timestamp: timestamp });
 }
 
-const editBookmark = (bookmark) => { }
 
 const deleteBookmark = async (bookmark) => {
     const currentTab = await getCurrentTab();
