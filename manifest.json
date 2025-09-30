@@ -30,9 +30,6 @@
             ],
             "js": [
                 "content.js"
-            ],
-            "style": [
-                "style.css"
             ]
         }
     ],
