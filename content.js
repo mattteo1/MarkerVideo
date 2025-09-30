@@ -1,3 +1,10 @@
+/**
+ * CONTENT SCRIPT - YouTube Bookmark Extension
+ * Si esegue nel contesto delle pagine YouTube per aggiungere funzionalità di bookmark.
+ * Gestisce: bottone bookmark nei controlli player, marker timeline, storage bookmark,
+ * comunicazione con sidepanel/background, navigazione video e salto timestamp.
+ */
+
 (() => {
     let youtubeLeftControls, youtubePlayer;
     let currentVideo = "";
@@ -14,24 +21,41 @@
 
     // Ascolta messaggi dal background
     chrome.runtime.onMessage.addListener((obj, sender, response) => {
+        // Controllo di sicurezza: verifica che l'estensione sia ancora attiva
+        // e che il messaggio ricevuto non sia null/undefined
         if (!isExtensionContextValid() || !obj) {
             console.warn("Message ignored: extension context invalid");
             return;
         }
         const { type, videoId, timestamp } = obj;
+
+        // CASO 1: Nuovo video caricato (messaggio dal background script)
+        // Viene inviato quando l'utente naviga su un nuovo video YouTube
         if (type === "NEW") {
             currentVideo = videoId;
             newVideoLoaded();
         }
+
+        // CASO 2: Salto a timestamp specifico (messaggio dal sidepanel)
+        // Quando l'utente clicca su un bookmark nel sidepanel
         if (type === "JUMP") {
             youtubePlayer.currentTime = timestamp;
         }
+
+        // CASO 3: Eliminazione bookmark singolo (messaggio dal sidepanel)
+        // Quando l'utente clicca il bottone elimina su un bookmark specifico
         if (type === "DELETE") {
             deleteBookmarkStorage(timestamp);
         }
+
+        // CASO 4: Eliminazione tutti i bookmark (messaggio dal sidepanel)
+        // Quando l'utente clicca "Cancella Tutto" nel footer
         if (type === "DELETEALL") {
             deleteAllBookmarksStorage();
         }
+
+        // CASO 5: Creazione nuovo bookmark (messaggio dal sidepanel)
+        // Quando l'utente clicca il bottone "Aggiungi Bookmark" nel sidepanel
         if (type === "CREATE_BOOKMARK") {
             addNewBookmarkEventHandler();
         }
@@ -94,7 +118,7 @@
         z-index: 100;
         pointer-events: none;
         box-shadow: 0 0 4px rgba(0,0,0,0.5);
-    `;
+        `;
 
         // Aggiungi tooltip opzionale
         marker.title = `Bookmark: ${getTime(bookmarkTime)}`;
@@ -104,29 +128,38 @@
     };
 
 
-
+    //Elimina tutti i bookmark per il video corrente dal Chrome Storage
+    //Viene chiamata quando l'utente clicca "Cancella Tutto" nel sidepanel
     const deleteAllBookmarksStorage = async () => {
         try {
             chrome.storage.sync.set({
                 [currentVideo]: JSON.stringify([])
             }, () => {
                 if (!chrome.runtime.lastError) {
-                    console.log("✅ Bookmark deleted successfully");
+                    console.log("Bookmark deleted successfully");
                 }
+                // Aggiorna i marker sulla timeline dopo l'eliminazione
+                // Il setTimeout evita problemi di timing con lo storage
+                setTimeout(() => {
+                    addBookmarkMarkers();  // Rimuove tutti i puntini dalla timeline
+                }, 500);
             });
         } catch (error) {
             console.error("Error in deleteAllBookmark:", error);
         }
     }
 
+
+    //Elimina un bookmark specifico dal Chrome Storage basandosi sul timestamp
+    //Viene chiamata quando l'utente clicca il bottone elimina su un singolo bookmark nel sidepanel
     const deleteBookmarkStorage = async (timestamp) => {
         try {
             currentVideoBookmarks = await fetchBookmarks();
 
-
             // Trova e rimuovi il bookmark con quel timestamp
             const indexToDelete = currentVideoBookmarks.findIndex(bookmark => bookmark.time === timestamp);
 
+            // Rimuove 1 elemento dall'array a partire dall'indice trovato
             if (indexToDelete !== -1) {
                 currentVideoBookmarks.splice(indexToDelete, 1);
 
@@ -137,17 +170,21 @@
 
             console.log("After delete:", currentVideoBookmarks.length);
 
+            // Salva l'array aggiornato (senza il bookmark eliminato) nel Chrome Storage
             chrome.storage.sync.set({
                 [currentVideo]: JSON.stringify(currentVideoBookmarks)
             }, () => {
+                // Callback eseguito dopo che il salvataggio è completato
                 if (!chrome.runtime.lastError) {
-                    console.log("✅ Bookmark deleted successfully");
+                    console.log("Bookmark deleted successfully");
+                    // Aggiorna i marker visivi sulla timeline di YouTube
                     setTimeout(() => {
                         addBookmarkMarkers();
                     }, 500);
                 }
             });
         } catch (error) {
+            // Gestisce errori generici (extension context invalidated, etc.)
             console.error("Error in deleteBookmark:", error);
         }
     }
@@ -162,13 +199,17 @@
                 return;
             }
             try {
+                // Richiede i dati dal Chrome Storage Sync usando currentVideo come chiave
+                // Storage sync sincronizza i dati tra dispositivi con lo stesso account Google
                 chrome.storage.sync.get([currentVideo], (obj) => {
                     // Controlla anche chrome.runtime.lastError
                     if (chrome.runtime.lastError) {
                         console.error('Storage error:', chrome.runtime.lastError);
-                        resolve([]);
+                        resolve([]); // Restituisce array vuoto per continuare l'esecuzione
                         return;
                     }
+                    // Se esistono bookmark per questo video, li deserializza da JSON
+                    // Altrimenti restituisce array vuoto per video senza bookmark
                     resolve(obj[currentVideo] ? JSON.parse(obj[currentVideo]) : []);
                 });
 
@@ -221,7 +262,7 @@
                     console.error('Error saving bookmark:', chrome.runtime.lastError);
                     alert('Errore nel salvare il bookmark');
                 } else {
-                    console.log("✅ Bookmark saved successfully");
+                    console.log("Bookmark saved successfully");
                     //Aggiorna i marker dopo aver salvato
                     setTimeout(() => {
                         addBookmarkMarkers();
@@ -238,7 +279,7 @@
     //viene chiamata ogni volta che l'utente cambia video su yt
     const newVideoLoaded = async () => {
         try {
-            // 1. Controlla duplicati
+            // Controlla duplicati
             if (document.querySelector(".bookmark-btn")) {
                 console.log("Bookmark button already exists");
                 return;
@@ -268,11 +309,10 @@
                 return;
             }
 
-
             youtubeLeftControls = controls;
             youtubePlayer = player;
 
-            // 6. Controlla di nuovo se il bottone è stato aggiunto nel frattempo
+            // Controlla di nuovo se il bottone è stato aggiunto nel frattempo
             if (controls.querySelector(".bookmark-btn")) {
                 console.log("Bookmark button already exists in controls");
                 return;
@@ -289,8 +329,6 @@
             bookmarkBtn.src = chrome.runtime.getURL("icons/bookmark.png");
             bookmarkBtn.className = "ytp-button bookmark-btn";
             bookmarkBtn.title = "Salva timestamp";
-
-
 
 
             console.log("Adding bookmark button to controls...");
@@ -310,10 +348,6 @@
         }
 
     }
-
-
-
-
 
 
 
@@ -359,25 +393,31 @@
 
 
 
+    //Funzione di inizializzazione che gestisce il caricamento dell'estensionesu una pagina YouTube. 
+    // Estrae l'ID video dalla URL e avvia il processo di creazione del bottone bookmark.
+
     const init = () => {
         const videoId = new URLSearchParams(location.search).get("v");
         if (!videoId) return;
         currentVideo = videoId;
         newVideoLoaded();
     };
+
+
+    //Event Listener per la navigazione SPA (Single Page Application) di YouTube non ricarica la pagina 
+    // quando navigi tra video, ma usa la history API
+    // L'evento "yt-navigate-finish" viene triggerato quando la navigazione è completata
     document.addEventListener("yt-navigate-finish", () => {
         setTimeout(init, 500);
     });
 
+    //Gestione dell'inizializzazione basata sullo stato del documento 
+    // Garantisce che l'estensione funzioni sia al primo caricamento che durante la navigazione successiva
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", init);
     } else {
         init();
     }
-
-
-    newVideoLoaded();
-
 
 
 })()
