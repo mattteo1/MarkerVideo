@@ -5,7 +5,7 @@
 
 
 //Listener per i cambiamenti di stato delle tab del browser
-//Si attiva ogni volta che una tab viene aggiornata (caricamento, URL change, etc.)
+//Si attiva ogni volta che una tab viene aggiornata (caricamento, URL change, etc)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
     // Controlla se il caricamento della pagina è completato E se siamo su una pagina video YouTube

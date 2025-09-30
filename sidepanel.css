@@ -1,3 +1,13 @@
+/**
+ * SIDEPANEL STYLES - YouTube Bookmark Extension
+ * 
+ * Foglio di stile per l'interfaccia del pannello laterale dell'estensione.
+ * Design: tema YouTube-inspired con rosso caratteristico, layout responsive,
+ * componenti modulari per header, video info, bookmark list, azioni utente.
+ * Ottimizzato per leggibilità e UX nativa su macOS/Windows.
+ */
+
+
 * {
     margin: 0;
     padding: 0;

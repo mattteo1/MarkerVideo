@@ -1,3 +1,13 @@
+/**
+ * SIDEPANEL SCRIPT - YouTube Bookmark Extension
+ * 
+ * Gestisce l'interfaccia utente del pannello laterale per visualizzare e controllare i bookmark.
+ * Funzioni: rendering dinamico bookmark da template HTML, comunicazione con content script,
+ * sincronizzazione con Chrome Storage, gestione stati UI (video caricato/non caricato/errori).
+ * Si connette a sidepanel.html per DOM e comunica con content.js via chrome.tabs.sendMessage.
+ */
+
+
 // Funzione per ottenere la tab attualmente attiva nel browser
 async function getCurrentTab() {
     //criteri di ricerca: solo tab attiva e nella finestra corrente del browser
@@ -8,7 +18,6 @@ async function getCurrentTab() {
     let [tab] = await chrome.tabs.query(queryOptions);
     return tab;
 }
-
 
 // Funzione per controllare se l'extension context è ancora valido
 function isExtensionContextValid() {
@@ -22,6 +31,7 @@ function isExtensionContextValid() {
 // Variabili globali per tenere traccia dello stato
 let currentVideo = "";
 let currentVideoBookmarks = [];
+
 
 const addNewBookmark = (bookmarkElement, bookmark) => {
     //Crea: <div></div> così const bookmarkTitleElement = document.createElement("div"); ...

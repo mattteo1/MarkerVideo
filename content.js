@@ -6,6 +6,7 @@
  */
 
 (() => {
+    //variabili globali per riferimenti DOM e stato
     let youtubeLeftControls, youtubePlayer;
     let currentVideo = "";
     let currentVideoBookmarks = [];
