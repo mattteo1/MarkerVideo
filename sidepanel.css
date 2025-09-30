@@ -252,7 +252,11 @@ body {
     /* Prende lo spazio rimanente */
 }
 
-
+/* Titolo de bookmark */
+.bookmark-title {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
 
 /* Data di creazione del bookmark */
 .bookmark-date {
@@ -269,7 +273,6 @@ body {
 }
 
 /* Stili per pulsanti di azione */
-.edit-btn,
 .delete-btn {
     background: none;
     border: none;
@@ -277,12 +280,6 @@ body {
     padding: 4px;
     border-radius: 4px;
     font-size: 14px;
-}
-
-/* Effetto hover per pulsante modifica */
-.edit-btn:hover {
-    background: #e3f2fd;
-    /* Blu chiaro */
 }
 
 /* Effetto hover per pulsante elimina */
@@ -314,14 +311,7 @@ body {
     background: white;
 }
 
-/* Sezione statistiche nel footer */
-.stats {
-    margin-bottom: 12px;
-    font-size: 14px;
-    text-align: center;
-    color: #666;
-    /* Grigio per info secondarie */
-}
+
 
 /* Pulsante di azione pericolosa (elimina tutto) */
 .danger-btn {
@@ -341,66 +331,4 @@ body {
 .danger-btn:hover {
     background: #c82333;
     /* Rosso più scuro */
-}
-
-/* Modal overlay per conferme */
-.modal {
-    position: fixed;
-    /* Posizione fissa rispetto alla viewport */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    /* Overlay semi-trasparente */
-    display: flex;
-    align-items: center;
-    /* Centra verticalmente */
-    justify-content: center;
-    /* Centra orizzontalmente */
-    z-index: 1000;
-    /* Sopra tutto il resto */
-}
-
-/* Stato nascosto del modal */
-.modal.hidden {
-    display: none;
-}
-
-/* Contenuto del modal */
-.modal-content {
-    background: white;
-    padding: 24px;
-    border-radius: 8px;
-    width: 90%;
-    /* Responsive */
-    max-width: 300px;
-    /* Larghezza massima */
-}
-
-/* Azioni nel modal (pulsanti) */
-.modal-actions {
-    display: flex;
-    gap: 8px;
-    /* Spazio tra i pulsanti */
-    margin-top: 16px;
-}
-
-/* Pulsante secondario (annulla) */
-.secondary-btn {
-    background: #6c757d;
-    /* Grigio Bootstrap */
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    flex: 1;
-    /* Prende metà spazio disponibile */
-}
-
-/* Effetto hover per pulsante secondario */
-.secondary-btn:hover {
-    background: #5a6268;
-    /* Grigio più scuro */
 }

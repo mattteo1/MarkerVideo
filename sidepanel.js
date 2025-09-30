@@ -35,7 +35,6 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
     const timeDisplay = bookmarkHTML.querySelector('.time-display');
     const jumpButton = bookmarkHTML.querySelector('.jump-btn');
     const deleteButton = bookmarkHTML.querySelector('.delete-btn');
-    const editButton = bookmarkHTML.querySelector('.edit-btn');
     const timestampDiv = bookmarkHTML.querySelector('.timestamp');
     const bookmarkTitleElement = bookmarkHTML.querySelector('.bookmark-title');
     const bookmarkDateElement = bookmarkHTML.querySelector('.bookmark-date');
@@ -54,14 +53,10 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
     }
 
 
-
     jumpButton.addEventListener('click', () => {
         jumpToTimestamp(bookmark);
     });
 
-    editButton.addEventListener('click', () => {
-        editBookmark(bookmark);
-    });
 
     deleteButton.addEventListener('click', () => {
         deleteBookmark(bookmark);
@@ -70,8 +65,6 @@ const addNewBookmark = (bookmarkElement, bookmark) => {
 
     //Aggiungi l'elemento al contenitore
     bookmarkElement.appendChild(bookmarkHTML);
-
-
 }
 
 
@@ -82,7 +75,6 @@ const jumpToTimestamp = async (bookmark) => {
     chrome.tabs.sendMessage(currentTab.id, { type: "JUMP", timestamp: timestamp });
 }
 
-const editBookmark = (bookmark) => { }
 
 const deleteBookmark = async (bookmark) => {
     const currentTab = await getCurrentTab();
@@ -147,7 +139,6 @@ const listenForStorageChanges = () => {
         return;
     }
 
-
     try {
         // Questa funzione viene chiamata AUTOMATICAMENTE ogni volta che:
         // - Qualcuno salva nuovi dati nel chrome.storage
@@ -161,7 +152,7 @@ const listenForStorageChanges = () => {
             // 3. Controlla se il cambiamento riguarda il nostro video (changes[currentVideo])
             if (namespace === 'sync' && currentVideo && changes[currentVideo]) {
 
-                // I bookmark sono cambiati per il video corrente
+                // 4. I bookmark sono cambiati per il video corrente
                 const newBookmarks = changes[currentVideo].newValue ?
                     JSON.parse(changes[currentVideo].newValue) : [];
 
@@ -188,17 +179,14 @@ const showExtensionError = () => {
     }
 }
 
-//sistema titolo video
+//funzione che sistema titolo del video
 function cleanYouTubeTitle(title) {
     if (!title) return 'Video YouTube';
 
-    // Rimuove il contatore di notifiche all'inizio: (1257)
-    let cleanTitle = title.replace(/^\(\d+\)\s*/, '');
-
-    // Rimuove il suffisso " - YouTube" alla fine
-    cleanTitle = cleanTitle.replace(/\s*-\s*YouTube$/, '');
-
-    return cleanTitle.trim();
+    return title
+        .replace(/^\(\d+\)\s*/, '') // Rimuove contatore notifiche
+        .replace(/\s*-\s*YouTube$/, '') // Rimuove suffisso YouTube
+        .trim();
 }
 
 // Aspetta che il DOM del side panel sia completamente caricato
